@@ -14,3 +14,5 @@
 * html .clearfix {height: 1%;}
 /* End hide from IE-mac */
 
+.left{float:left}
+.right{float:right}

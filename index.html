@@ -15,7 +15,23 @@
 		body{
 			background:black;
 		}
-
+		/* start toolbar */
+		.toolbar{
+			position:absolute;
+			z-index:9999;
+			width:100%;
+		}
+		.character{
+			width:50px;
+			height:50px;
+			-webkit-border-radius: 25px;
+			-moz-border-radius: 25px;
+			border-radius: 25px;
+			border:3px solid #d4d4d4;
+		}
+		.character.selected{
+			border:3px solid yellow;
+		}
 		/* start landscape */
 		.landscape{
 			position:absolute;
@@ -78,7 +94,18 @@
 </head>
 <body>
 	<div id="main">
-		<div class='landscape'>
+		<div class="toolbar clearfix">
+			<div class="toolbar-right left">
+				<div>Points: <span class="toolbar-points">0</span></div>
+				<div>Lives: <span class="toolbar-lives">1</span></div>
+			</div>
+			<div class="toolbar-left right">
+				<div class="toolbar-character-select">
+					
+				</div>
+			</div>
+		</div>
+		<div class="landscape">
 			<div class="sky">
 				<img src="sprites/mountain_scape.png" class="scape"/>
 				<img src="sprites/city_scape.png" class="scape"/>

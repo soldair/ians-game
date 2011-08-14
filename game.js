@@ -4,6 +4,18 @@ var game = {
 		this.hiIan();
 		this.watchKeys();
 		this.spriteMovement();
+		this.toolbarCharacterSelect();
+		this.heartBeat();
+	},
+	state:{
+		character:'sonic',
+		top:0,
+		left:0,
+		speed:8,
+		image:{
+			direction:'l',
+			event:null
+		}
 	},
 	hiIan:function(){
 		$(".field").click(function(){
@@ -16,7 +28,6 @@ var game = {
 			},4000);
 		});
 	},
-	spriteSpeed:8,
 	spriteMovement:function(){
 		var z = this
 		,sprite = $(".sprite")[0]
@@ -29,9 +40,10 @@ var game = {
 		this.watchKey(37,'press',function(){
 			var l = $(sprite).css('left')||'0px';
 			l = +(l.replace('px',''));
-			l = l-z.spriteSpeed;
+			l = l-z.state.speed;
 
 			if(facing == 'l') {
+				z.state.image.direction = 'l';
 				z.updateSpriteImage(spriteImg,'l');
 				facing = 'r';
 			}
@@ -41,9 +53,10 @@ var game = {
 		this.watchKey(39,'press',function(){
 			var l = $(sprite).css('left')||'0px';
 			l = +(l.replace('px',''));
-			l= l+z.spriteSpeed;
+			l= l+z.state.speed;
 
 			if(facing == 'r') {
+				z.state.image.direction = 'r';
 				z.updateSpriteImage(spriteImg,'r');
 				facing = 'l';
 			}
@@ -77,7 +90,7 @@ var game = {
 									animating = animatingDig = false;
 									z.updateSpriteImage(spriteImg,null,'dig');
 									$(this).animate({bottom:'0'},500,function(){
-										z.updateSpriteImage(spriteImg,null,null);
+										z.updateSpriteImage(spriteImg,false,null);
 									});
 								});
 							});
@@ -85,6 +98,23 @@ var game = {
 					});
 				},200);
 			});
+		});
+	},
+	characters:['sonic','tales','knuckles'],
+	toolbarCharacterSelect:function(){
+		var z = this;
+		// init characters
+		$(".toolbar-character-select .character").live('click',function(){
+			z.state.character = $(this).attr('data-name');
+			z.updateSpriteImage($(".sprite img")[0],false,false);
+			$(".toolbar-character-select .character").removeClass('selected');
+			$(this).addClass('selected');
+		});
+		
+		$.each(z.characters,function(k,v){
+			$(".toolbar-character-select").append('<div class="character left" data-name="'+v+'">'
+				+'<img src="sprites/select_'+v+'.png" alt="'+v+'"/>'
+			+'</div>');
 		});
 	},
 	watchers:{},
@@ -126,12 +156,23 @@ var game = {
 		suffix = this.spriteImageState.facing=='r'?'':'_'+this.spriteImageState.facing;
 		suffix += this.spriteImageState.event?'_'+this.spriteImageState.event:'';
 		
-		//console.log(suffix);
-		
-		img.src = img.src.split('_')[0].replace('.png','')+suffix+'.png';
+		img.src = 'sprites/'+this.state.character+suffix+'.png';
 	},
 	artifactSprite:function(img,top,left,life){
 		//create a way create artifacts related to actions both above and below the sprite
+	},
+	heartBeatInterval:33,
+	heartBeatListeners:[],
+	onBeat:function(cb){
+		heartBeatListeners.push(cb);
+	},
+	heartBeat:function(){
+		var z = this;
+		setTimeout(function(){
+			for(var i =0,j=z.heartBeatListeners.length;i<j;i++) {
+				z.heartBeatListeners[i]();
+			}
+		},this.heartBeatInterval);
 	}
 };
 
