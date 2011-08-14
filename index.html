@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ians game</title>
+	<link rel="stylesheet" type="text/css" href="main.css"/>
+	<style>
+		#main{
+			width:900px;
+			margin:0px auto;
+			background:white;
+			min-height:500px;
+			position:relative;
+		}
+
+		body{
+			background:black;
+		}
+
+		/* start landscape */
+		.landscape{
+			position:absolute;
+			z-index:1;
+			width:100%;
+		}
+		.sky{
+			background:#b1cef6;
+			height:400px;
+		}
+		.grass{
+			background:#1e7633;
+			height:125px;
+		}
+		.dirt{
+			background:#7e6a44;
+			height:100px;
+		}
+		.scape{
+			position:absolute;
+		}
+		/* scenelayer.., trees and stuff. z-index 2 to 100*/
+		.scenelayer{
+			position:absolute;
+			z-index:2;
+			width:100%;
+			height:450px;
+			overflow:hidden;
+		}
+		.scene{
+			width:900px;
+			height:450px;
+			float:left;
+			position:relative;
+		}
+		.scene-sprite-bottom{
+			position:absolute;
+			bottom:0px;
+		}
+		.scene-sprite-top{
+			position:absolute;
+			top:0px;
+		}
+		/* field */
+		.field{
+			position:absolute;
+			z-index:100;
+			height:475px;
+			width:100%;
+		}
+		.sprite{
+			position:absolute;
+			bottom:0px;
+			width:62px;
+			height:100px;
+		}
+	</style>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+	<script src="game.js"></script>
+</head>
+<body>
+	<div id="main">
+		<div class='landscape'>
+			<div class="sky">
+				<img src="sprites/mountain_scape.png" class="scape"/>
+				<img src="sprites/city_scape.png" class="scape"/>
+			</div>
+			<div class="grass">
+
+			</div>
+			<div class="dirt">
+
+			</div>
+		</div>
+		<div class="scenelayer clearfix">
+			<div class="scene">
+				<img src="sprites/tree1_300.png" class="scene-sprite-bottom" style="left:100px;"/>
+				<img src="sprites/bush1_200_100.png" class="scene-sprite-bottom" style="left:400px;"/>
+			</div>
+			<div class="scene">
+				<img src="sprites/bush1_200_100.png" class="scene-sprite-bottom" style="left:200px;"/>
+			</div>
+			<div class="scene">
+				<img src="sprites/bush1_200_100.png" class="scene-sprite-bottom" style="left:100px;"/>
+				<img src="sprites/tree1_300.png" class="scene-sprite-bottom" style="left:300px;"/>
+			</div>
+		</div>
+		<div class="field">
+			<div class="sprite">
+				<img src="sprites/sonic.png"/>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

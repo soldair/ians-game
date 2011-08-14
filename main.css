@@ -1,0 +1,16 @@
+.clearfix:after {
+	content: " ";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+	font-size: 0;
+}
+.clearfix {
+	display: block;/*the holy hack for a bug in IE6 for Windows*/
+	min-height:0px;/*holy hack for ie7 clearfix containers that do not strech to hold content*/
+}
+/* Hides from IE-mac \*/
+* html .clearfix {height: 1%;}
+/* End hide from IE-mac */
+
