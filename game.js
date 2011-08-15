@@ -1,10 +1,18 @@
 
 var game = {
 	init:function(){
+		//direct
 		this.hiIan();
 		this.watchKeys();
 		this.spriteMovement();
 		this.toolbarCharacterSelect();
+		
+		//on beats
+		this.applyMovement();
+		this.positionSprite();
+		this.updateSpriteImage();
+
+		// activate heartbeat
 		this.heartBeat();
 	},
 	state:{
@@ -13,9 +21,10 @@ var game = {
 		left:0,
 		speed:8,
 		image:{
-			direction:'l',
+			direction:'r',
 			event:null
-		}
+		},
+		keys:{}
 	},
 	hiIan:function(){
 		$(".field").click(function(){
@@ -28,42 +37,58 @@ var game = {
 			},4000);
 		});
 	},
+	positionSprite:function(){
+		var z = this
+		,sprite = $(".sprite")
+		,lastLeft;
+		
+		z.onBeat(function(){
+			if(lastLeft != z.state.left) {
+				$(sprite).css('left',z.state.left+'px');
+				lastLeft = z.state.left;
+			}
+		});
+	},
+	applyMovement:function(){
+		var z = this
+		,spriteWidth = $(".sprite").width()
+		,maxLeft = $(".scenelayer").width();
+		
+		z.onBeat(function(){
+			if(z.state.keys.left && z.state.keys.right) {
+				return;
+			} else if (z.state.keys.left) {
+				var l = z.state.left-z.state.speed;
+				if(l > 0) z.state.left = l;
+			} else if(z.state.keys.right){
+				var l = z.state.left+z.state.speed;
+				if(l+spriteWidth < maxLeft) z.state.left = l;
+			}
+		});
+	},
 	spriteMovement:function(){
 		var z = this
 		,sprite = $(".sprite")[0]
 		,spriteImg = $(".sprite img")[0]
-		,maxLeft = $(".scenelayer").width()
-		,spriteWidth = $(".sprite").width()
-		,animating = animatingJump = animatingDig = false
-		,facing = 'l';
+		,animating = animatingJump = animatingDig = false;
 
-		this.watchKey(37,'press',function(){
-			var l = $(sprite).css('left')||'0px';
-			l = +(l.replace('px',''));
-			l = l-z.state.speed;
-
-			if(facing == 'l') {
-				z.state.image.direction = 'l';
-				z.updateSpriteImage(spriteImg,'l');
-				facing = 'r';
-			}
-			
-			if(l > 0) $(sprite).css({left:l+'px'});
+		this.watchKey(37,'down',function(){
+			z.state.image.direction = 'l';
+			z.state.keys.left = 1;
 		});
-		this.watchKey(39,'press',function(){
-			var l = $(sprite).css('left')||'0px';
-			l = +(l.replace('px',''));
-			l= l+z.state.speed;
+		this.watchKey(39,'down',function(){
+			z.state.keys.right = 1;
+			z.state.image.direction = 'r';
+		});
 
-			if(facing == 'r') {
-				z.state.image.direction = 'r';
-				z.updateSpriteImage(spriteImg,'r');
-				facing = 'l';
-			}
-			
-			if(l+spriteWidth < maxLeft) $(sprite).css({left:l+'px'});
+		this.watchKey(37,'up',function(){
+			z.state.keys.left = 0;
+		});
+		this.watchKey(39,'up',function(){
+			z.state.keys.right = 0;
 		});
 		
+		//jumping
 		this.watchKey([32,38],'down',function(){
 			if(animating || animatingJump) return;
 			animating = animatingJump = true;
@@ -75,26 +100,27 @@ var game = {
 			});
 		});
 
+		//digging
 		this.watchKey(40,'down',function(){
 			if(animating||animatingDig) return;
 			animating = animatingDig = true;
 			
 			$(sprite).animate({bottom:'-=75'},500,function(){
-				z.updateSpriteImage(spriteImg,null,'dig');
+				z.state.image.event = 'dig';
 				setTimeout(function(){
 					$(sprite).animate({bottom:'-=50'},500,function(){
-						z.updateSpriteImage(spriteImg,null,'dug');
+						z.state.image.event = 'dug';
 						setTimeout(function(){
 							$(sprite).animate({bottom:'-=25'},500,function(){
 								$(this).animate({bottom:'+=50'},500,function(){
 									animating = animatingDig = false;
-									z.updateSpriteImage(spriteImg,null,'dig');
+									z.state.image.event = 'dig';
 									$(this).animate({bottom:'0'},500,function(){
-										z.updateSpriteImage(spriteImg,false,null);
+										z.state.image.event = null;
 									});
 								});
 							});
-						});
+						},200);
 					});
 				},200);
 			});
@@ -106,7 +132,7 @@ var game = {
 		// init characters
 		$(".toolbar-character-select .character").live('click',function(){
 			z.state.character = $(this).attr('data-name');
-			z.updateSpriteImage($(".sprite img")[0],false,false);
+
 			$(".toolbar-character-select .character").removeClass('selected');
 			$(this).addClass('selected');
 		});
@@ -116,6 +142,8 @@ var game = {
 				+'<img src="sprites/select_'+v+'.png" alt="'+v+'"/>'
 			+'</div>');
 		});
+		
+		$(".toolbar-character-select .character[data-name="+z.state.character+"]").addClass('selected');
 	},
 	watchers:{},
 	watchKeys:function(){
@@ -149,28 +177,40 @@ var game = {
 		facing:'l',
 		event:null
 	},
-	updateSpriteImage:function(img,facing,event){
-		if(facing) this.spriteImageState.facing = facing;
-		if(event || event === null) this.spriteImageState.event = event;
-
-		suffix = this.spriteImageState.facing=='r'?'':'_'+this.spriteImageState.facing;
-		suffix += this.spriteImageState.event?'_'+this.spriteImageState.event:'';
+	updateSpriteImage:function(){
+		var z = this
+		,img = $(".sprite img")[0];
 		
-		img.src = 'sprites/'+this.state.character+suffix+'.png';
+		z.onBeat(function(){
+			var src = z.state.image.direction=='r'?'':'_'+z.state.image.direction;
+			src += z.state.image.event?'_'+z.state.image.event:'';
+			src = 'sprites/'+z.state.character+src+'.png'
+			if(img.src != src) {
+				img.src = src;
+			}
+		});
 	},
 	artifactSprite:function(img,top,left,life){
 		//create a way create artifacts related to actions both above and below the sprite
 	},
-	heartBeatInterval:33,
+	heartBeatInterval:28,
 	heartBeatListeners:[],
 	onBeat:function(cb){
-		heartBeatListeners.push(cb);
+		this.heartBeatListeners.push(cb);
 	},
 	heartBeat:function(){
-		var z = this;
-		setTimeout(function(){
-			for(var i =0,j=z.heartBeatListeners.length;i<j;i++) {
-				z.heartBeatListeners[i]();
+		var z = this
+		,interval;
+		
+		interval = setInterval(function(){
+			try{
+				for(var i =0,j=z.heartBeatListeners.length;i<j;i++) {
+					z.heartBeatListeners[i]();
+				}
+			} catch(e) {
+				clearInterval(interval);
+				console.warn("ERROR in heartbeat. stopping interval");
+				console.error(e);
 			}
 		},this.heartBeatInterval);
 	}
