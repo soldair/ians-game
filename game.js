@@ -21,6 +21,7 @@ var game = {
 		left:0,
 		speed:8,
 		image:{
+			src:null,
 			direction:'r',
 			event:null
 		},
@@ -185,8 +186,8 @@ var game = {
 			var src = z.state.image.direction=='r'?'':'_'+z.state.image.direction;
 			src += z.state.image.event?'_'+z.state.image.event:'';
 			src = 'sprites/'+z.state.character+src+'.png'
-			if(img.src != src) {
-				img.src = src;
+			if(z.state.image.src != src) {
+				img.src = z.state.image.src = src;
 			}
 		});
 	},
